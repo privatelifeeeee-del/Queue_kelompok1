@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Queue Interaktif</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Visualisasi Queue Interaktif</h1>
+            <div class="subtitle">Simulasi operasi Enqueue dan Dequeue dengan Array Statis, Linked List, dan Queue Circular</div>
+        </header>
+        
+        <div class="main-content">
+            <div class="visualization-section">
+                <div class="queue-type-selector">
+                    <div class="queue-type active" id="array-type">Array Statis</div>
+                    <div class="queue-type" id="linkedlist-type">Linked List</div>
+                    <div class="queue-type" id="circular-type">Queue Circular</div>
+                </div>
+                
+                <!-- Kontrol ukuran untuk Array Statis dan Queue Circular -->
+                <div class="size-control" id="size-control">
+                    <label for="queue-size-input">Jumlah kotak:</label>
+                    <input type="number" id="queue-size-input" min="3" max="10" value="5">
+                    <button class="btn btn-update" id="update-size-btn">Update Ukuran</button>
+                </div>
+                
+                <!-- Keterangan Warna -->
+                <div class="color-legend">
+                    <div class="legend-item">
+                        <div class="legend-color front"></div>
+                        <span>FRONT (Depan)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color rear"></div>
+                        <span>REAR (Belakang)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color normal"></div>
+                        <span>Elemen Biasa</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color empty"></div>
+                        <span>Kosong</span>
+                    </div>
+                </div>
+                
+                <div id="array-visualization">
+                    <h2 class="queue-title">Queue dengan Array Statis</h2>
+                    
+                    <div class="queue-container">
+                        <div class="queue-items" id="array-queue-container">
+                            <div class="queue-item empty">0</div>
+                            <div class="queue-item empty">1</div>
+                            <div class="queue-item empty">2</div>
+                            <div class="queue-item empty">3</div>
+                            <div class="queue-item empty">4</div>
+                        </div>
+                    </div>
+                    
+                    <div class="explanation">
+                        <p><strong>Array Statis</strong> memiliki ukuran tetap. Ketika rear mencapai akhir array, queue dianggap penuh meskipun mungkin ada ruang kosong di depan. <strong>Warna coklat muda</strong> menandakan FRONT, <strong>warna coklat tua</strong> menandakan REAR.</p>
+                    </div>
+                </div>
+                
+                <div id="linkedlist-visualization" style="display: none;">
+                    <h2 class="queue-title">Queue dengan Linked List</h2>
+                    
+                    <div class="queue-container">
+                        <div class="queue-items" id="linkedlist-queue-container">
+                            <div class="queue-item empty">Empty</div>
+                        </div>
+                    </div>
+                    
+                    <div class="explanation">
+                        <p><strong>Linked List</strong> memiliki ukuran dinamis. Setiap elemen terhubung dengan pointer. Enqueue menambah di rear, Dequeue menghapus di front. <strong>Warna coklat muda</strong> menandakan FRONT, <strong>warna coklat tua</strong> menandakan REAR.</p>
+                    </div>
+                </div>
+                
+                <div id="circular-visualization" style="display: none;">
+                    <h2 class="queue-title">Queue Circular</h2>
+                    
+                    <div class="circular-indicator" id="circular-indicator">
+                        Front: 0, Rear: 0
+                    </div>
+                    
+                    <div class="queue-container">
+                        <div class="queue-items" id="circular-queue-container">
+                            <div class="queue-item empty">0</div>
+                            <div class="queue-item empty">1</div>
+                            <div class="queue-item empty">2</div>
+                            <div class="queue-item empty">3</div>
+                            <div class="queue-item empty">4</div>
+                        </div>
+                    </div>
+                    
+                    <div class="explanation">
+                        <p><strong>Queue Circular</strong> memanfaatkan array secara melingkar. Ketika Rear mencapai akhir, ia akan kembali ke awal jika ada ruang kosong. <strong>Warna coklat muda</strong> menandakan FRONT, <strong>warna coklat tua</strong> menandakan REAR.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h2>Kontrol Queue</h2>
+                
+                <div class="controls">
+                    <div class="input-group">
+                        <label for="input-value">Masukkan nilai:</label>
+                        <input type="text" id="input-value" placeholder="Masukkan nilai">
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-enqueue" id="enqueue-btn"><i>+</i> Enqueue</button>
+                        <button class="btn btn-dequeue" id="dequeue-btn"><i>-</i> Dequeue</button>
+                        <button class="btn btn-clear" id="clear-btn"><i>×</i> Clear Queue</button>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>Informasi Queue</h3>
+                    <div class="info-item">
+                        <span>Ukuran Queue:</span>
+                        <span id="queue-size">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Front Element:</span>
+                        <span id="queue-front">Tidak ada</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Rear Element:</span>
+                        <span id="queue-rear">Tidak ada</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Status:</span>
+                        <span id="queue-status">Kosong</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Tipe Queue:</span>
+                        <span id="queue-type">Array Statis</span>
+                    </div>
+                </div>
+                
+                <div class="history">
+                    <h3>Riwayat Operasi</h3>
+                    <div id="operation-history">
+                        <div class="history-item">Queue dibuat. Silakan lakukan operasi.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
