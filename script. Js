@@ -1,0 +1,358 @@
+// Data structure untuk queue
+let queueData = [];
+let operationHistory = [];
+let queueType = 'array'; // 'array', 'linkedlist', 'circular'
+let maxArraySize = 5;
+let frontIndex = 0;
+let rearIndex = 0;
+
+// Fungsi untuk memperbarui tampilan queue
+function updateQueueVisualization() {
+    const arrayContainer = document.getElementById('array-queue-container');
+    const linkedListContainer = document.getElementById('linkedlist-queue-container');
+    const circularContainer = document.getElementById('circular-queue-container');
+    
+    arrayContainer.innerHTML = '';
+    linkedListContainer.innerHTML = '';
+    circularContainer.innerHTML = '';
+    
+    if (queueType === 'array') {
+        // Tampilan array statis
+        for (let i = 0; i < maxArraySize; i++) {
+            const element = document.createElement('div');
+            element.className = 'queue-item';
+            
+            if (i < queueData.length) {
+                element.textContent = queueData[i];
+                if (queueData.length === 1) {
+                    element.classList.add('both');
+                } else {
+                    if (i === 0) element.classList.add('front');
+                    if (i === queueData.length - 1) element.classList.add('rear');
+                }
+            } else {
+                element.classList.add('empty');
+                element.textContent = i;
+            }
+            
+            arrayContainer.appendChild(element);
+        }
+        
+        // Update informasi queue
+        document.getElementById('queue-size').textContent = queueData.length;
+        document.getElementById('queue-front').textContent = queueData.length > 0 ? queueData[0] : 'Tidak ada';
+        document.getElementById('queue-rear').textContent = queueData.length > 0 ? queueData[queueData.length - 1] : 'Tidak ada';
+        document.getElementById('queue-status').textContent = queueData.length > 0 ? 'Berisi' : 'Kosong';
+        document.getElementById('queue-type').textContent = 'Array Statis';
+    } 
+    else if (queueType === 'linkedlist') {
+        // Tampilan linked list
+        if (queueData.length === 0) {
+            linkedListContainer.innerHTML = '<div class="queue-item empty">Empty</div>';
+        } else {
+            queueData.forEach((item, index) => {
+                const element = document.createElement('div');
+                element.className = 'queue-item';
+                element.textContent = String(item);
+                
+                if (queueData.length === 1) {
+                    element.classList.add('both');
+                } else {
+                    if (index === 0) element.classList.add('front');
+                    if (index === queueData.length - 1) element.classList.add('rear');
+                }
+                
+                linkedListContainer.appendChild(element);
+                
+                // Tambah panah jika bukan elemen terakhir
+                if (index < queueData.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'linked-arrow';
+                    arrow.innerHTML = '→';
+                    linkedListContainer.appendChild(arrow);
+                }
+            });
+        }
+        
+        // Update informasi queue
+        document.getElementById('queue-size').textContent = queueData.length;
+        document.getElementById('queue-front').textContent = queueData.length > 0 ? queueData[0] : 'Tidak ada';
+        document.getElementById('queue-rear').textContent = queueData.length > 0 ? queueData[queueData.length - 1] : 'Tidak ada';
+        document.getElementById('queue-status').textContent = queueData.length > 0 ? 'Berisi' : 'Kosong';
+        document.getElementById('queue-type').textContent = 'Linked List';
+    }
+    else if (queueType === 'circular') {
+        // Tampilan queue circular
+        for (let i = 0; i < maxArraySize; i++) {
+            const element = document.createElement('div');
+            element.className = 'queue-item';
+            element.textContent = i;
+            
+            // Hitung posisi data dalam queue circular
+            const dataIndex = (frontIndex + i) % maxArraySize;
+            const isEmpty = i >= queueData.length;
+            
+            if (!isEmpty) {
+                element.textContent = queueData[i];
+                if (i === 0) element.classList.add('front');
+                if (i === queueData.length - 1) element.classList.add('rear');
+            } else {
+                element.classList.add('empty');
+            }
+            
+            circularContainer.appendChild(element);
+        }
+        
+        // Update circular indicator
+        document.getElementById('circular-indicator').textContent = `Front: ${frontIndex}, Rear: ${rearIndex}`;
+        
+        // Update informasi queue
+        document.getElementById('queue-size').textContent = queueData.length;
+        document.getElementById('queue-front').textContent = queueData.length > 0 ? queueData[0] : 'Tidak ada';
+        document.getElementById('queue-rear').textContent = queueData.length > 0 ? queueData[queueData.length - 1] : 'Tidak ada';
+        document.getElementById('queue-status').textContent = queueData.length > 0 ? 'Berisi' : 'Kosong';
+        document.getElementById('queue-type').textContent = 'Queue Circular';
+    }
+}
+
+// Fungsi untuk menambahkan riwayat operasi
+function addHistory(message) {
+    operationHistory.push(message);
+    const historyContainer = document.getElementById('operation-history');
+    
+    // Hanya tampilkan 6 operasi terakhir
+    if (operationHistory.length > 6) {
+        operationHistory.shift();
+    }
+    
+    historyContainer.innerHTML = '';
+    operationHistory.forEach(op => {
+        const element = document.createElement('div');
+        element.className = 'history-item';
+        element.textContent = op;
+        historyContainer.appendChild(element);
+    });
+}
+
+// Operasi Enqueue
+function enqueue() {
+    const input = document.getElementById('input-value');
+    const value = input.value.trim();
+    
+    if (value === '') {
+        alert('Silakan masukkan nilai!');
+        return;
+    }
+    
+    // Cek jika queue penuh (hanya untuk array statis dan circular)
+    if ((queueType === 'array' || queueType === 'circular') && queueData.length >= maxArraySize) {
+        addHistory(`Enqueue(Front,Rear,Queue,${value}): Gagal (Queue penuh)`);
+        alert('Queue penuh! Tidak dapat melakukan enqueue.');
+        return;
+    }
+    
+    queueData.push(value);
+    
+    // Untuk queue circular, update rear index
+    if (queueType === 'circular') {
+        rearIndex = (rearIndex + 1) % maxArraySize;
+    }
+    
+    addHistory(`Enqueue(Front,Rear,Queue,${value})`);
+    
+    // Animasi berguling untuk elemen yang baru ditambahkan
+    const container = queueType === 'array' ? 
+        document.getElementById('array-queue-container') : 
+        (queueType === 'linkedlist' ? 
+            document.getElementById('linkedlist-queue-container') : 
+            document.getElementById('circular-queue-container'));
+    
+    updateQueueVisualization();
+    
+    const newElement = container.lastChild;
+    if (newElement && newElement.classList) {
+        newElement.classList.add('roll-in');
+        
+        // Hapus class animasi setelah selesai
+        setTimeout(() => {
+            newElement.classList.remove('roll-in');
+        }, 800);
+    }
+    
+    // Reset input
+    input.value = '';
+    input.focus();
+}
+
+// Operasi Dequeue
+function dequeue() {
+    if (queueData.length === 0) {
+        addHistory('Dequeue(Front,Rear,Queue,Item): Gagal (Queue kosong)');
+        alert('Queue kosong! Tidak dapat melakukan dequeue.');
+        return;
+    }
+    
+    const value = queueData[0];
+    
+    // Animasi berguling keluar untuk elemen yang dihapus
+    const container = queueType === 'array' ? 
+        document.getElementById('array-queue-container') : 
+        (queueType === 'linkedlist' ? 
+            document.getElementById('linkedlist-queue-container') : 
+            document.getElementById('circular-queue-container'));
+    
+    const firstElement = container.firstChild;
+    if (firstElement && firstElement.classList) {
+        firstElement.classList.add('roll-out');
+        
+        // Tunggu animasi selesai sebelum menghapus elemen
+        setTimeout(() => {
+            queueData.shift();
+            
+            // Untuk queue circular, update front index
+            if (queueType === 'circular') {
+                frontIndex = (frontIndex + 1) % maxArraySize;
+            }
+            
+            addHistory(`Dequeue(Front,Rear,Queue,${value})`);
+            updateQueueVisualization();
+        }, 700);
+    } else {
+        queueData.shift();
+        
+        // Untuk queue circular, update front index
+        if (queueType === 'circular') {
+            frontIndex = (frontIndex + 1) % maxArraySize;
+        }
+        
+        addHistory(`Dequeue(Front,Rear,Queue,${value})`);
+        updateQueueVisualization();
+    }
+}
+
+// Operasi Clear Queue
+function clearQueue() {
+    if (queueData.length === 0) {
+        alert('Queue sudah kosong!');
+        return;
+    }
+    
+    if (confirm('Apakah Anda yakin ingin mengosongkan queue?')) {
+        // Animasi untuk semua elemen
+        const container = queueType === 'array' ? 
+            document.getElementById('array-queue-container') : 
+            (queueType === 'linkedlist' ? 
+                document.getElementById('linkedlist-queue-container') : 
+                document.getElementById('circular-queue-container'));
+        
+        const items = container.querySelectorAll('.queue-item:not(.empty)');
+        items.forEach(item => {
+            item.classList.add('roll-out');
+        });
+        
+        // Tunggu animasi selesai sebelum mengosongkan queue
+        setTimeout(() => {
+            queueData = [];
+            frontIndex = 0;
+            rearIndex = 0;
+            addHistory('Clear: Mengosongkan queue');
+            updateQueueVisualization();
+        }, 700);
+    }
+}
+
+// Fungsi untuk mengubah tipe queue
+function changeQueueType(type) {
+    const arrayType = document.getElementById('array-type');
+    const linkedlistType = document.getElementById('linkedlist-type');
+    const circularType = document.getElementById('circular-type');
+    
+    // Reset semua tampilan
+    document.getElementById('array-visualization').style.display = 'none';
+    document.getElementById('linkedlist-visualization').style.display = 'none';
+    document.getElementById('circular-visualization').style.display = 'none';
+    arrayType.classList.remove('active');
+    linkedlistType.classList.remove('active');
+    circularType.classList.remove('active');
+    
+    // Tampilkan kontrol ukuran hanya untuk array dan circular
+    if (type === 'array' || type === 'circular') {
+        document.getElementById('size-control').style.display = 'block';
+    } else {
+        document.getElementById('size-control').style.display = 'none';
+    }
+    
+    // Set tipe yang dipilih
+    queueType = type;
+    
+    if (type === 'array') {
+        arrayType.classList.add('active');
+        document.getElementById('array-visualization').style.display = 'block';
+        addHistory('Mode diubah ke: Array Statis');
+    } 
+    else if (type === 'linkedlist') {
+        linkedlistType.classList.add('active');
+        document.getElementById('linkedlist-visualization').style.display = 'block';
+        addHistory('Mode diubah ke: Linked List');
+    }
+    else if (type === 'circular') {
+        circularType.classList.add('active');
+        document.getElementById('circular-visualization').style.display = 'block';
+        addHistory('Mode diubah ke: Queue Circular');
+    }
+    
+    updateQueueVisualization();
+}
+
+// Fungsi untuk mengubah ukuran queue
+function updateQueueSize() {
+    const sizeInput = document.getElementById('queue-size-input');
+    const newSize = parseInt(sizeInput.value);
+    
+    if (newSize < 3 || newSize > 10) {
+        alert('Ukuran queue harus antara 3 dan 10');
+        return;
+    }
+    
+    maxArraySize = newSize;
+    
+    // Reset queue jika ukuran berubah
+    queueData = [];
+    frontIndex = 0;
+    rearIndex = 0;
+    
+    addHistory(`Ukuran queue diubah menjadi: ${newSize}`);
+    updateQueueVisualization();
+}
+
+// Inisialisasi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    updateQueueVisualization();
+    addHistory('Queue dibuat. Silakan lakukan operasi.');
+    
+    // Event listener untuk input agar bisa menggunakan Enter
+    document.getElementById('input-value').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            enqueue();
+        }
+    });
+    
+    // Event listener untuk toggle tipe queue
+    document.getElementById('array-type').addEventListener('click', function() {
+        changeQueueType('array');
+    });
+    
+    document.getElementById('linkedlist-type').addEventListener('click', function() {
+        changeQueueType('linkedlist');
+    });
+    
+    document.getElementById('circular-type').addEventListener('click', function() {
+        changeQueueType('circular');
+    });
+    
+    // Event listener untuk tombol
+    document.getElementById('enqueue-btn').addEventListener('click', enqueue);
+    document.getElementById('dequeue-btn').addEventListener('click', dequeue);
+    document.getElementById('clear-btn').addEventListener('click', clearQueue);
+    document.getElementById('update-size-btn').addEventListener('click', updateQueueSize);
+});
